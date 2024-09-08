@@ -1,3 +1,24 @@
+<p align="center">
+  <img src="github-export-import-stars.png" width="60%" alt="GITHUB-EXPORT-IMPORT-STARS-logo">
+</p>
+<p align="center">
+    <h1 align="center">GITHUB-EXPORT-IMPORT-STARS</h1>
+</p>
+<p align="center">
+    <em>Seamlessly Transfer Your GitHub Stars, Effortlessly.</em>
+</p>
+<p align="center">
+	<img src="https://img.shields.io/github/license/richardadonnell/github-export-import-stars?style=default&logo=opensourceinitiative&logoColor=white&color=0080ff" alt="license">
+	<img src="https://img.shields.io/github/last-commit/richardadonnell/github-export-import-stars?style=default&logo=git&logoColor=white&color=0080ff" alt="last-commit">
+	<img src="https://img.shields.io/github/languages/top/richardadonnell/github-export-import-stars?style=default&color=0080ff" alt="repo-top-language">
+	<img src="https://img.shields.io/github/languages/count/richardadonnell/github-export-import-stars?style=default&color=0080ff" alt="repo-language-count">
+</p>
+<p align="center">
+	<!-- default option, no dependency badges. -->
+</p>
+
+<br>
+
 # GitHub Star Transfer
 
 This project allows you to transfer starred repositories from one GitHub account to another. It's a Python script that uses the GitHub API to fetch starred repositories from a source account and star them in a target account.
