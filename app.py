@@ -70,7 +70,8 @@ def star_repos(user_export_token, user_import_token, dry_run=True):
                 try:
                     while True:
                         try:
-                            user2.add_to_starred(repo.full_name)
+                            # Change this line
+                            user2.add_to_starred(g2.get_repo(repo.full_name))
                             logger.info(f"Starred {repo.full_name}")
                             time.sleep(1)  # Add a 1-second delay between API calls
                             break
