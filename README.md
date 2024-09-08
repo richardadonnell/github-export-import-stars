@@ -2,6 +2,14 @@
 
 This project allows you to transfer starred repositories from one GitHub account to another. It's a Python script that uses the GitHub API to fetch starred repositories from a source account and star them in a target account.
 
+## Why?
+
+I had a lot of stars in a "legacy" GitHub account, and I wanted to re-star all the repos on my new "main" GitHub account.
+
+About 1,283 stars to be exact - took this script about 30 mins to run (due to safely rate limiting API calls). All while I sat back, relaxed, and caught up on some YouTube subscription videos ... 🥳
+
+... profit ???
+
 ## Features
 
 - Export starred repositories from one GitHub account
