@@ -28,7 +28,7 @@ logger.addHandler(console_handler)
 logger.debug(f"Export token from env: {os.getenv('GITHUB_EXPORT_TOKEN')[:5] if os.getenv('GITHUB_EXPORT_TOKEN') else 'Not set'}...")
 logger.debug(f"Import token from env: {os.getenv('GITHUB_IMPORT_TOKEN')[:5] if os.getenv('GITHUB_IMPORT_TOKEN') else 'Not set'}...")
 
-def star_repos(user_export_token, user_import_token, dry_run=False):
+def star_repos(user_export_token, user_import_token, dry_run=True):
     # Create Github instances for both users
     auth1 = Auth.Token(user_export_token)
     auth2 = Auth.Token(user_import_token)
@@ -57,6 +57,13 @@ def star_repos(user_export_token, user_import_token, dry_run=False):
         starred_repos = list(user1.get_starred())
         logger.info(f"Found {len(starred_repos)} starred repositories")
 
+        # If dry run, export the list of repos to a text file
+        if dry_run:
+            with open('repos_to_star.txt', 'w') as f:
+                for repo in starred_repos:
+                    f.write(f"{repo.full_name}\n")
+            logger.info(f"Exported list of repos to star to 'repos_to_star.txt'")
+
         # Star the same repositories for user2
         for repo in starred_repos:
             try:
@@ -78,7 +85,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Star GitHub repositories from one account to another.")
     parser.add_argument("--export-token", help="Access token for the account to export stars from")
     parser.add_argument("--import-token", help="Access token for the account to import stars to")
-    parser.add_argument("--dry-run", action="store_true", help="Perform a dry run without actually starring repositories")
+    parser.add_argument("--run", action="store_true", help="Actually star repositories (default is dry run)")
     args = parser.parse_args()
 
     logger.debug("Script started with arguments: %s", args)
@@ -98,7 +105,7 @@ if __name__ == "__main__":
     logger.debug(f"Import token starts with: {import_token[:5] if import_token else 'N/A'}...")
 
     if export_token.startswith('ghp_') and import_token.startswith('ghp_'):
-        star_repos(export_token, import_token, args.dry_run)
+        star_repos(export_token, import_token, not args.run)
     else:
         logger.error(f"Invalid token format. Ensure your tokens start with 'ghp_' and are correctly set in the .env file or provided as arguments.")
         logger.debug(f"Export token prefix: {export_token[:5] if export_token else 'N/A'}")

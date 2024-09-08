@@ -70,16 +70,48 @@ Repeat this process for both the export and import accounts.
 Run the script using the following command:
 
 ```
-python app.py [--export-token TOKEN] [--import-token TOKEN] [--dry-run]
+python app.py [--export-token TOKEN] [--import-token TOKEN] [--run]
 ```
 
 Arguments:
 
 - `--export-token`: Access token for the account to export stars from (optional if set in .env)
 - `--import-token`: Access token for the account to import stars to (optional if set in .env)
-- `--dry-run`: Perform a dry run without actually starring repositories
+- `--run`: Actually star repositories (default is dry run)
 
 If tokens are not provided as arguments, the script will use the values from the `.env` file.
+
+### Dry Run (Default)
+
+By default, the script runs in dry run mode. In this mode:
+
+1. It will not actually star any repositories.
+2. It will log the repositories it would have starred.
+3. It will create a file named `repos_to_star.txt` in the same directory, containing the full names of the repositories that would be starred.
+
+To perform a dry run:
+
+```
+python app.py
+```
+
+### Actually Starring Repositories
+
+To actually star the repositories, use the `--run` flag:
+
+```
+python app.py --run
+```
+
+This will perform the actual starring operation.
+
+## Output
+
+The script produces the following outputs:
+
+1. Console output: Displays INFO level messages about the script's progress.
+2. `debug.log` file: Contains detailed DEBUG level messages for troubleshooting.
+3. `repos_to_star.txt` file: (In dry run mode only) Contains the list of repository full names that would be starred.
 
 ## Logging
 
