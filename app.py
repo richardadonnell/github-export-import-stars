@@ -1,8 +1,9 @@
 import logging
-from github import Github, Auth
+from github import Github, Auth, RateLimitExceededException
 import argparse
 import os
 from dotenv import load_dotenv
+import time
 
 # Load environment variables
 load_dotenv()
@@ -67,10 +68,24 @@ def star_repos(user_export_token, user_import_token, dry_run=True):
             # Star the same repositories for user2
             for repo in starred_repos:
                 try:
-                    user2.add_to_starred(repo.full_name)
-                    logger.info(f"Starred {repo.full_name}")
+                    while True:
+                        try:
+                            user2.add_to_starred(repo.full_name)
+                            logger.info(f"Starred {repo.full_name}")
+                            time.sleep(1)  # Add a 1-second delay between API calls
+                            break
+                        except RateLimitExceededException as e:
+                            reset_time = g2.get_rate_limit().core.reset.timestamp()
+                            sleep_time = reset_time - time.time() + 1
+                            logger.warning(f"Rate limit exceeded. Sleeping for {sleep_time:.2f} seconds.")
+                            time.sleep(sleep_time)
+                        except AssertionError as ae:
+                            logger.error(f"AssertionError when starring {repo.full_name}: {str(ae)}")
+                            logger.debug(f"Full error details: {type(ae).__name__} - {str(ae)}")
+                            break  # Skip this repo and move to the next one
                 except Exception as e:
                     logger.error(f"Failed to star {repo.full_name}: {str(e)}")
+                    logger.debug(f"Error details: {type(e).__name__} - {str(e)}")
         else:
             logger.info(f"Dry run completed. {len(starred_repos)} repositories would be starred.")
 
