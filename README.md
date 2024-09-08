@@ -28,16 +28,14 @@ About 1,283 stars to be exact - took this script about 30 mins to run (due to sa
 To use this script, you need to create Personal Access Tokens for both the source (export) and target (import) GitHub accounts. Here's how to create them:
 
 1. Log in to your GitHub account.
-2. Click on your profile picture in the top-right corner and select "Settings".
-3. In the left sidebar, click on "Developer settings".
-4. Select "Personal access tokens" and then "Tokens (classic)".
-5. Click "Generate new token" and select "Generate new token (classic)".
-6. Give your token a descriptive name (e.g., `Star Import/Export`).
-7. For the required permissions, select the following scopes:
+2. Navigate to [https://github.com/settings/tokens](https://github.com/settings/tokens)
+3. Click "Generate new token" and select "Generate new token (classic)".
+4. Give your token a descriptive name (e.g., `Star Import/Export`).
+5. For the required permissions, select the following scopes:
    - `public_repo`: This allows the script to read public repositories and manage your stars.
    - `read:user`: This allows the script to read user profile data.
-8. Click "Generate token" at the bottom of the page.
-9. Copy the generated token immediately and store it securely. You won't be able to see it again!
+6. Click "Generate token" at the bottom of the page.
+7. Copy the generated token immediately and store it securely. You won't be able to see it again!
 
 Repeat this process for both the export and import accounts.
 
