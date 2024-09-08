@@ -57,21 +57,22 @@ def star_repos(user_export_token, user_import_token, dry_run=True):
         starred_repos = list(user1.get_starred())
         logger.info(f"Found {len(starred_repos)} starred repositories")
 
-        # If dry run, export the list of repos to a text file
-        if dry_run:
-            with open('repos_to_star.txt', 'w') as f:
-                for repo in starred_repos:
-                    f.write(f"{repo.full_name}\n")
-            logger.info(f"Exported list of repos to star to 'repos_to_star.txt'")
+        # Always export the list of repos to a text file
+        with open('repos_to_star.txt', 'w') as f:
+            for repo in starred_repos:
+                f.write(f"{repo.full_name}\n")
+        logger.info(f"Exported list of {len(starred_repos)} repos to star to 'repos_to_star.txt'")
 
-        # Star the same repositories for user2
-        for repo in starred_repos:
-            try:
-                if not dry_run:
+        if not dry_run:
+            # Star the same repositories for user2
+            for repo in starred_repos:
+                try:
                     user2.add_to_starred(repo.full_name)
-                logger.info(f"{'Would star' if dry_run else 'Starred'} {repo.full_name}")
-            except Exception as e:
-                logger.error(f"Failed to star {repo.full_name}: {str(e)}")
+                    logger.info(f"Starred {repo.full_name}")
+                except Exception as e:
+                    logger.error(f"Failed to star {repo.full_name}: {str(e)}")
+        else:
+            logger.info(f"Dry run completed. {len(starred_repos)} repositories would be starred.")
 
     except Exception as e:
         logger.error(f"An unexpected error occurred: {str(e)}")
