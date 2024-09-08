@@ -46,7 +46,7 @@ Repeat this process for both the export and import accounts.
 1. Clone this repository:
 
    ```
-   git clone https://github.com/yourusername/github-star-transfer.git
+   git clone https://github.com/richardadonnell/github-export-import-stars.git
    cd github-star-transfer
    ```
 
