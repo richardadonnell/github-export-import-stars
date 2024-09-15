@@ -1,9 +1,10 @@
-import logging
-from github import Github, Auth, RateLimitExceededException
 import argparse
+import logging
 import os
-from dotenv import load_dotenv
 import time
+
+from dotenv import load_dotenv
+from github import Auth, Github, RateLimitExceededException
 
 # Load environment variables
 load_dotenv()
@@ -33,8 +34,8 @@ def star_repos(user_export_token, user_import_token, dry_run=True):
     # Create Github instances for both users
     auth1 = Auth.Token(user_export_token)
     auth2 = Auth.Token(user_import_token)
-    g1 = Github(auth=auth1)
-    g2 = Github(auth=auth2)
+    g1 = Github(auth=auth1, per_page=100)  # Increase per_page to 100
+    g2 = Github(auth=auth2, per_page=100)  # Increase per_page to 100
 
     try:
         # Verify authentication for both tokens
@@ -55,29 +56,37 @@ def star_repos(user_export_token, user_import_token, dry_run=True):
             return
 
         # Get starred repositories from user1
-        starred_repos = list(user1.get_starred())
-        logger.info(f"Found {len(starred_repos)} starred repositories")
+        starred_repos_user1 = list(user1.get_starred())
+        logger.info(f"Found {len(starred_repos_user1)} starred repositories for export user")
+
+        # Get starred repositories from user2
+        starred_repos_user2 = list(user2.get_starred())
+        logger.info(f"Found {len(starred_repos_user2)} starred repositories for import user")
+
+        # Find repositories that are starred by user1 but not by user2
+        repos_to_star = [repo for repo in starred_repos_user1 if repo not in starred_repos_user2]
+        logger.info(f"Found {len(repos_to_star)} repositories to star")
 
         # Always export the list of repos to a text file
         with open('repos_to_star.txt', 'w') as f:
-            for repo in starred_repos:
+            for repo in repos_to_star:
                 f.write(f"{repo.full_name}\n")
-        logger.info(f"Exported list of {len(starred_repos)} repos to star to 'repos_to_star.txt'")
+        logger.info(f"Exported list of {len(repos_to_star)} repos to star to 'repos_to_star.txt'")
 
         if not dry_run:
-            # Star the same repositories for user2
-            for repo in starred_repos:
+            # Star the repositories for user2 that are not already starred
+            for repo in repos_to_star:
                 try:
                     while True:
                         try:
-                            # Change this line
                             user2.add_to_starred(g2.get_repo(repo.full_name))
                             logger.info(f"Starred {repo.full_name}")
-                            time.sleep(1)  # Add a 1-second delay between API calls
+                            time.sleep(1)  # Add a 1-second delay between starring each repo
                             break
                         except RateLimitExceededException as e:
                             reset_time = g2.get_rate_limit().core.reset.timestamp()
-                            sleep_time = reset_time - time.time() + 1
+                            retry_after = e.headers.get('Retry-After', 0)
+                            sleep_time = max(reset_time - time.time(), int(retry_after)) + 1
                             logger.warning(f"Rate limit exceeded. Sleeping for {sleep_time:.2f} seconds.")
                             time.sleep(sleep_time)
                         except AssertionError as ae:
@@ -88,7 +97,7 @@ def star_repos(user_export_token, user_import_token, dry_run=True):
                     logger.error(f"Failed to star {repo.full_name}: {str(e)}")
                     logger.debug(f"Error details: {type(e).__name__} - {str(e)}")
         else:
-            logger.info(f"Dry run completed. {len(starred_repos)} repositories would be starred.")
+            logger.info(f"Dry run completed. {len(repos_to_star)} repositories would be starred.")
 
     except Exception as e:
         logger.error(f"An unexpected error occurred: {str(e)}")
