@@ -34,8 +34,8 @@ def star_repos(user_export_token, user_import_token, dry_run=True):
     # Create Github instances for both users
     auth1 = Auth.Token(user_export_token)
     auth2 = Auth.Token(user_import_token)
-    g1 = Github(auth=auth1, per_page=100)  # Increase per_page to 100
-    g2 = Github(auth=auth2, per_page=100)  # Increase per_page to 100
+    g1 = Github(auth=auth1, per_page=100)
+    g2 = Github(auth=auth2, per_page=100)
 
     try:
         # Verify authentication for both tokens
@@ -76,33 +76,32 @@ def star_repos(user_export_token, user_import_token, dry_run=True):
         if not dry_run:
             # Star the repositories for user2 that are not already starred
             for repo in repos_to_star:
-                try:
-                    while True:
-                        try:
-                            user2.add_to_starred(g2.get_repo(repo.full_name))
-                            logger.info(f"Starred {repo.full_name}")
-                            time.sleep(1)  # Add a 1-second delay between starring each repo
-                            break
-                        except RateLimitExceededException as e:
-                            reset_time = g2.get_rate_limit().core.reset.timestamp()
-                            retry_after = e.headers.get('Retry-After', 0)
-                            sleep_time = max(reset_time - time.time(), int(retry_after)) + 1
-                            logger.warning(f"Rate limit exceeded. Sleeping for {sleep_time:.2f} seconds.")
-                            time.sleep(sleep_time)
-                        except AssertionError as ae:
-                            logger.error(f"AssertionError when starring {repo.full_name}: {str(ae)}")
-                            logger.debug(f"Full error details: {type(ae).__name__} - {str(ae)}")
-                            break  # Skip this repo and move to the next one
-                except Exception as e:
-                    logger.error(f"Failed to star {repo.full_name}: {str(e)}")
-                    logger.debug(f"Error details: {type(e).__name__} - {str(e)}")
+                while True:
+                    try:
+                        user2.add_to_starred(g2.get_repo(repo.full_name))
+                        logger.info(f"Starred {repo.full_name}")
+                        break
+                    except RateLimitExceededException as e:
+                        reset_time = e.headers.get('x-ratelimit-reset')
+                        retry_after = e.headers.get('retry-after')
+                        if retry_after:
+                            sleep_time = int(retry_after)
+                        elif reset_time:
+                            sleep_time = int(reset_time) - int(time.time())
+                        else:
+                            sleep_time = 60
+                        logger.warning(f"Rate limit exceeded. Retrying in {sleep_time} seconds.")
+                        time.sleep(sleep_time)
+                    except Exception as e:
+                        logger.error(f"Failed to star {repo.full_name}: {str(e)}")
+                        break
+                time.sleep(1)
         else:
             logger.info(f"Dry run completed. {len(repos_to_star)} repositories would be starred.")
 
     except Exception as e:
         logger.error(f"An unexpected error occurred: {str(e)}")
     finally:
-        # Close the connections
         g1.close()
         g2.close()
         logger.debug("Closed Github connections")
@@ -116,7 +115,6 @@ if __name__ == "__main__":
 
     logger.debug("Script started with arguments: %s", args)
 
-    # Modify the token reading part
     export_token = args.export_token or os.getenv('GITHUB_EXPORT_TOKEN')
     import_token = args.import_token or os.getenv('GITHUB_IMPORT_TOKEN')
 
